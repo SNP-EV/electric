@@ -1,1007 +1,190 @@
-<!DOCTYPE html> 
-
-<html lang="zh-CN"> 
-
-<head> 
-
-    <meta charset="UTF-8"> 
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-
-    <title>配电室电路走向管理系统</title> 
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"> 
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> 
-
-    <style> 
-
-        :root { 
-
-            --primary-color: #2c3e50; 
-
-            --secondary-color: #3498db; 
-
-            --accent-color: #e74c3c; 
-
-            --light-color: #ecf0f1; 
-
-            --success-color: #2ecc71; 
-
-        } 
-
-         
-
-        body { 
-
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-
-            background-color: #f8f9fa; 
-
-            color: #333; 
-
-        } 
-
-         
-
-        .navbar { 
-
-            background-color: var(--primary-color); 
-
-        } 
-
-         
-
-        .sidebar { 
-
-            background-color: white; 
-
-            border-right: 1px solid #dee2e6; 
-
-            height: calc(100vh - 56px); 
-
-            position: sticky; 
-
-            top: 56px; 
-
-            overflow-y: auto; 
-
-        } 
-
-         
-
-        .sidebar .nav-link { 
-
-            color: #495057; 
-
-            padding: 0.75rem 1rem; 
-
-            border-radius: 0.25rem; 
-
-            margin: 0.125rem 0.5rem; 
-
-        } 
-
-         
-
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { 
-
-            background-color: var(--secondary-color); 
-
-            color: white; 
-
-        } 
-
-         
-
-        .card { 
-
-            border: none; 
-
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); 
-
-            margin-bottom: 1.5rem; 
-
-            transition: transform 0.2s; 
-
-        } 
-
-         
-
-        .card:hover { 
-
-            transform: translateY(-2px); 
-
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); 
-
-        } 
-
-         
-
-        .card-header { 
-
-            background-color: var(--primary-color); 
-
-            color: white; 
-
-            font-weight: 600; 
-
-        } 
-
-         
-
-        .path-container { 
-
-            background-color: white; 
-
-            border-radius: 0.5rem; 
-
-            padding: 1.5rem; 
-
-            margin-bottom: 1.5rem; 
-
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); 
-
-        } 
-
-         
-
-        .path-step { 
-
-            display: flex; 
-
-            align-items: center; 
-
-            margin-bottom: 1rem; 
-
-            position: relative; 
-
-        } 
-
-         
-
-        .path-step:not(:last-child):after { 
-
-            content: ''; 
-
-            position: absolute; 
-
-            left: 2.5rem; 
-
-            bottom: -1rem; 
-
-            width: 2px; 
-
-            height: 1rem; 
-
-            background-color: var(--secondary-color); 
-
-        } 
-
-         
-
-        .step-icon { 
-
-            width: 3rem; 
-
-            height: 3rem; 
-
-            border-radius: 50%; 
-
-            background-color: var(--secondary-color); 
-
-            color: white; 
-
-            display: flex; 
-
-            align-items: center; 
-
-            justify-content: center; 
-
-            margin-right: 1rem; 
-
-            flex-shrink: 0; 
-
-        } 
-
-         
-
-        .step-content { 
-
-            flex-grow: 1; 
-
-        } 
-
-         
-
-        .step-title { 
-
-            font-weight: 600; 
-
-            margin-bottom: 0.25rem; 
-
-        } 
-
-         
-
-        .step-desc { 
-
-            color: #6c757d; 
-
-            font-size: 0.875rem; 
-
-        } 
-
-         
-
-        .status-badge { 
-
-            padding: 0.25rem 0.5rem; 
-
-            border-radius: 0.25rem; 
-
-            font-size: 0.75rem; 
-
-            font-weight: 600; 
-
-        } 
-
-         
-
-        .status-normal { 
-
-            background-color: var(--success-color); 
-
-            color: white; 
-
-        } 
-
-         
-
-        .status-warning { 
-
-            background-color: #f39c12; 
-
-            color: white; 
-
-        } 
-
-         
-
-        .status-danger { 
-
-            background-color: var(--accent-color); 
-
-            color: white; 
-
-        } 
-
-         
-
-        .search-box { 
-
-            position: relative; 
-
-        } 
-
-         
-
-        .search-box input { 
-
-            padding-right: 2.5rem; 
-
-        } 
-
-         
-
-        .search-box i { 
-
-            position: absolute; 
-
-            right: 0.75rem; 
-
-            top: 50%; 
-
-            transform: translateY(-50%); 
-
-            color: #6c757d; 
-
-        } 
-
-         
-
-        .device-card { 
-
-            cursor: pointer; 
-
-            transition: all 0.2s; 
-
-        } 
-
-         
-
-        .device-card:hover { 
-
-            border-color: var(--secondary-color); 
-
-        } 
-
-         
-
-        .device-card.selected { 
-
-            border-color: var(--secondary-color); 
-
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25); 
-
-        } 
-
-         
-
-        .stats-card { 
-
-            text-align: center; 
-
-            padding: 1rem; 
-
-        } 
-
-         
-
-        .stats-number { 
-
-            font-size: 2rem; 
-
-            font-weight: 700; 
-
-            color: var(--primary-color); 
-
-        } 
-
-         
-
-        .stats-label { 
-
-            font-size: 0.875rem; 
-
-            color: #6c757d; 
-
-        } 
-
-         
-
-        .fade-in { 
-
-            animation: fadeIn 0.5s; 
-
-        } 
-
-         
-
-        @keyframes fadeIn { 
-
-            from { opacity: 0; } 
-
-            to { opacity: 1; } 
-
-        } 
-
-    </style> 
-
-</head> 
-
-<body> 
-
-    <!-- 导航栏 --> 
-
-    <nav class="navbar navbar-expand-lg navbar-dark"> 
-
-        <div class="container-fluid"> 
-
-            <a class="navbar-brand" href="#"> 
-
-                <i class="fas fa-bolt me-2"></i> 
-
-                配电室电路走向管理系统 
-
-            </a> 
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"> 
-
-                <span class="navbar-toggler-icon"></span> 
-
-            </button> 
-
-            <div class="collapse navbar-collapse" id="navbarNav"> 
-
-                <ul class="navbar-nav ms-auto"> 
-
-                    <li class="nav-item"> 
-
-                        <a class="nav-link" href="#"><i class="fas fa-home me-1"></i> 首页</a> 
-
-                    </li> 
-
-                    <li class="nav-item"> 
-
-                        <a class="nav-link" href="#"><i class="fas fa-cog me-1"></i> 系统设置</a> 
-
-                    </li> 
-
-                    <li class="nav-item"> 
-
-                        <a class="nav-link" href="#"><i class="fas fa-user me-1"></i> 管理员</a> 
-
-                    </li> 
-
-                </ul> 
-
-            </div> 
-
-        </div> 
-
-    </nav> 
-
- 
-
-    <div class="container-fluid"> 
-
-        <div class="row"> 
-
-            <!-- 侧边栏 --> 
-
-            <div class="col-lg-2 col-md-3 d-md-block sidebar collapse"> 
-
-                <div class="d-flex flex-column flex-shrink-0 p-3"> 
-
-                    <ul class="nav nav-pills flex-column mb-auto"> 
-
-                        <li class="nav-item"> 
-
-                            <a href="#" class="nav-link active"> 
-
-                                <i class="fas fa-tachometer-alt me-2"></i> 
-
-                                仪表盘 
-
-                            </a> 
-
-                        </li> 
-
-                        <li> 
-
-                            <a href="#" class="nav-link"> 
-
-                                <i class="fas fa-th-large me-2"></i> 
-
-                                配电柜管理 
-
-                            </a> 
-
-                        </li> 
-
-                        <li> 
-
-                            <a href="#" class="nav-link"> 
-
-                                <i class="fas fa-box me-2"></i> 
-
-                                配电箱管理 
-
-                            </a> 
-
-                        </li> 
-
-                        <li> 
-
-                            <a href="#" class="nav-link"> 
-
-                                <i class="fas fa-plug me-2"></i> 
-
-                                终端设备 
-
-                            </a> 
-
-                        </li> 
-
-                        <li> 
-
-                            <a href="#" class="nav-link"> 
-
-                                <i class="fas fa-project-diagram me-2"></i> 
-
-                                电路拓扑 
-
-                            </a> 
-
-                        </li> 
-
-                        <li> 
-
-                            <a href="#" class="nav-link"> 
-
-                                <i class="fas fa-chart-bar me-2"></i> 
-
-                                统计分析 
-
-                            </a> 
-
-                        </li> 
-
-                        <li> 
-
-                            <a href="#" class="nav-link"> 
-
-                                <i class="fas fa-cogs me-2"></i> 
-
-                                系统设置 
-
-                            </a> 
-
-                        </li> 
-
-                    </ul> 
-
-                </div> 
-
-            </div> 
-
- 
-
-            <!-- 主内容区 --> 
-
-            <div class="col-lg-10 col-md-9 ms-sm-auto px-md-4"> 
-
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"> 
-
-                    <h1 class="h2">电路路径查询</h1> 
-
-                    <div class="btn-toolbar mb-2 mb-md-0"> 
-
-                        <div class="btn-group me-2"> 
-
-                            <button type="button" class="btn btn-sm btn-outline-secondary">导出数据</button> 
-
-                            <button type="button" class="btn btn-sm btn-outline-secondary">打印</button> 
-
-                        </div> 
-
-                    </div> 
-
-                </div> 
-
- 
-
-                <!-- 统计卡片 --> 
-
-                <div class="row mb-4"> 
-
-                    <div class="col-md-3"> 
-
-                        <div class="card stats-card"> 
-
-                            <div class="stats-number">12</div> 
-
-                            <div class="stats-label">配电柜总数</div> 
-
-                        </div> 
-
-                    </div> 
-
-                    <div class="col-md-3"> 
-
-                        <div class="card stats-card"> 
-
-                            <div class="stats-number">48</div> 
-
-                            <div class="stats-label">配电箱总数</div> 
-
-                        </div> 
-
-                    </div> 
-
-                    <div class="col-md-3"> 
-
-                        <div class="card stats-card"> 
-
-                            <div class="stats-number">156</div> 
-
-                            <div class="stats-label">终端设备总数</div> 
-
-                        </div> 
-
-                    </div> 
-
-                    <div class="col-md-3"> 
-
-                        <div class="card stats-card"> 
-
-                            <div class="stats-number">3</div> 
-
-                            <div class="stats-label">异常设备</div> 
-
-                        </div> 
-
-                    </div> 
-
-                </div> 
-
- 
-
-                <div class="row"> 
-
-                    <!-- 设备列表 --> 
-
-                    <div class="col-md-4"> 
-
-                        <div class="card"> 
-
-                            <div class="card-header d-flex justify-content-between align-items-center"> 
-
-                                <span>设备列表</span> 
-
-                                <div class="search-box"> 
-
-                                    <input type="text" class="form-control form-control-sm" placeholder="搜索设备..."> 
-
-                                    <i class="fas fa-search"></i> 
-
-                                </div> 
-
-                            </div> 
-
-                            <div class="card-body"> 
-
-                                <div class="list-group list-group-flush"> 
-
-                                    <div class="list-group-item device-card selected"> 
-
-                                        <div class="d-flex w-100 justify-content-between"> 
-
-                                            <h6 class="mb-1">会议室电视</h6> 
-
-                                            <span class="status-badge status-normal">正常</span> 
-
-                                        </div> 
-
-                                        <p class="mb-1">设备ID: TV-001</p> 
-
-                                        <small class="text-muted">位置: 三楼301会议室</small> 
-
-                                    </div> 
-
-                                    <div class="list-group-item device-card"> 
-
-                                        <div class="d-flex w-100 justify-content-between"> 
-
-                                            <h6 class="mb-1">服务器A</h6> 
-
-                                            <span class="status-badge status-normal">正常</span> 
-
-                                        </div> 
-
-                                        <p class="mb-1">设备ID: SERVER-001</p> 
-
-                                        <small class="text-muted">位置: 四楼数据中心</small> 
-
-                                    </div> 
-
-                                    <div class="list-group-item device-card"> 
-
-                                        <div class="d-flex w-100 justify-content-between"> 
-
-                                            <h6 class="mb-1">空调系统</h6> 
-
-                                            <span class="status-badge status-warning">警告</span> 
-
-                                        </div> 
-
-                                        <p class="mb-1">设备ID: AC-001</p> 
-
-                                        <small class="text-muted">位置: 一楼大厅</small> 
-
-                                    </div> 
-
-                                    <div class="list-group-item device-card"> 
-
-                                        <div class="d-flex w-100 justify-content-between"> 
-
-                                            <h6 class="mb-1">照明系统</h6> 
-
-                                            <span class="status-badge status-normal">正常</span> 
-
-                                        </div> 
-
-                                        <p class="mb-1">设备ID: LIGHT-001</p> 
-
-                                        <small class="text-muted">位置: 二楼走廊</small> 
-
-                                    </div> 
-
-                                    <div class="list-group-item device-card"> 
-
-                                        <div class="d-flex w-100 justify-content-between"> 
-
-                                            <h6 class="mb-1">监控摄像头</h6> 
-
-                                            <span class="status-badge status-danger">故障</span> 
-
-                                        </div> 
-
-                                        <p class="mb-1">设备ID: CAM-001</p> 
-
-                                        <small class="text-muted">位置: 一楼入口</small> 
-
-                                    </div> 
-
-                                </div> 
-
-                            </div> 
-
-                        </div> 
-
-                    </div> 
-
- 
-
-                    <!-- 电路路径 --> 
-
-                    <div class="col-md-8"> 
-
-                        <div class="card"> 
-
-                            <div class="card-header"> 
-
-                                电路路径详情 
-
-                            </div> 
-
-                            <div class="card-body"> 
-
-                                <h5 class="card-title">会议室电视 (TV-001) 电路路径</h5> 
-
-                                <p class="card-text">显示从配电室到终端设备的完整电路路径。</p> 
-
-                                 
-
-                                <div class="path-container fade-in"> 
-
-                                    <div class="path-step"> 
-
-                                        <div class="step-icon"> 
-
-                                            <i class="fas fa-bolt"></i> 
-
-                                        </div> 
-
-                                        <div class="step-content"> 
-
-                                            <div class="step-title">总配电室 - 主配电柜A</div> 
-
-                                            <div class="step-desc">抽屉编号: A-03 | 电流: 63A | 状态: 正常</div> 
-
-                                        </div> 
-
-                                    </div> 
-
-                                     
-
-                                    <div class="path-step"> 
-
-                                        <div class="step-icon"> 
-
-                                            <i class="fas fa-random"></i> 
-
-                                        </div> 
-
-                                        <div class="step-content"> 
-
-                                            <div class="step-title">楼层配电箱 - 三楼配电箱B</div> 
-
-                                            <div class="step-desc">编号: F3-B | 电流: 32A | 状态: 正常</div> 
-
-                                        </div> 
-
-                                    </div> 
-
-                                     
-
-                                    <div class="path-step"> 
-
-                                        <div class="step-icon"> 
-
-                                            <i class="fas fa-box"></i> 
-
-                                        </div> 
-
-                                        <div class="step-content"> 
-
-                                            <div class="step-title">区域配电箱 - 301会议室配电箱</div> 
-
-                                            <div class="step-desc">编号: R301 | 电流: 16A | 状态: 正常</div> 
-
-                                        </div> 
-
-                                    </div> 
-
-                                     
-
-                                    <div class="path-step"> 
-
-                                        <div class="step-icon"> 
-
-                                            <i class="fas fa-tv"></i> 
-
-                                        </div> 
-
-                                        <div class="step-content"> 
-
-                                            <div class="step-title">终端设备 - 会议室电视</div> 
-
-                                            <div class="step-desc">设备ID: TV-001 | 功率: 150W | 状态: 正常</div> 
-
-                                        </div> 
-
-                                    </div> 
-
-                                </div> 
-
-                                 
-
-                                <div class="mt-4"> 
-
-                                    <h6>电路参数</h6> 
-
-                                    <div class="row"> 
-
-                                        <div class="col-md-6"> 
-
-                                            <table class="table table-sm"> 
-
-                                                <tbody> 
-
-                                                    <tr> 
-
-                                                        <td>总电压</td> 
-
-                                                        <td>380V</td> 
-
-                                                    </tr> 
-
-                                                    <tr> 
-
-                                                        <td>总电流</td> 
-
-                                                        <td>63A</td> 
-
-                                                    </tr> 
-
-                                                    <tr> 
-
-                                                        <td>线路长度</td> 
-
-                                                        <td>85米</td> 
-
-                                                    </tr> 
-
-                                                </tbody> 
-
-                                            </table> 
-
-                                        </div> 
-
-                                        <div class="col-md-6"> 
-
-                                            <table class="table table-sm"> 
-
-                                                <tbody> 
-
-                                                    <tr> 
-
-                                                        <td>线缆规格</td> 
-
-                                                        <td>4×16mm²</td> 
-
-                                                    </tr> 
-
-                                                    <tr> 
-
-                                                        <td>安装日期</td> 
-
-                                                        <td>2022-05-15</td> 
-
-                                                    </tr> 
-
-                                                    <tr> 
-
-                                                        <td>最后维护</td> 
-
-                                                        <td>2023-08-20</td> 
-
-                                                    </tr> 
-
-                                                </tbody> 
-
-                                            </table> 
-
-                                        </div> 
-
-                                    </div> 
-
-                                </div> 
-
-                            </div> 
-
-                        </div> 
-
-                    </div> 
-
-                </div> 
-
-            </div> 
-
-        </div> 
-
-    </div> 
-
- 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> 
-
-    <script> 
-
-        // 设备选择交互 
-
-        document.addEventListener('DOMContentLoaded', function() { 
-
-            const deviceCards = document.querySelectorAll('.device-card'); 
-
-             
-
-            deviceCards.forEach(card => { 
-
-                card.addEventListener('click', function() { 
-
-                    // 移除所有选中状态 
-
-                    deviceCards.forEach(c => c.classList.remove('selected')); 
-
-                     
-
-                    // 添加当前选中状态 
-
-                    this.classList.add('selected'); 
-
-                     
-
-                    // 这里可以添加AJAX请求来更新电路路径信息 
-
-                    // 为了演示，我们只是简单显示一个提示 
-
-                    const deviceName = this.querySelector('h6').textContent; 
-
-                    document.querySelector('.card-title').textContent = deviceName + ' 电路路径'; 
-
-                     
-
-                    // 添加淡入效果 
-
-                    const pathContainer = document.querySelector('.path-container'); 
-
-                    pathContainer.classList.remove('fade-in'); 
-
-                    void pathContainer.offsetWidth; // 触发重排 
-
-                    pathContainer.classList.add('fade-in'); 
-
-                }); 
-
-            }); 
-
-        }); 
-
-    </script> 
-
-</body> 
-
-</html> 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>企业配电拓扑生成器</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* 顶部控制栏 */
+        .toolbar { 
+            padding: 15px 30px; background: #1e293b; border-bottom: 1px solid #334155; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .title-box h1 { font-size: 20px; margin: 0; color: #fff; }
+        .title-box p { font-size: 12px; color: #94a3b8; margin: 5px 0 0 0; }
+        
+        /* 上传按钮美化 */
+        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; }
+        .btn { 
+            border: 1px solid #3b82f6; color: white; background-color: #2563eb; 
+            padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; 
+            transition: background 0.3s;
+        }
+        .btn:hover { background-color: #1d4ed8; }
+        .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+        /* 图表区域 */
+        #main-chart { flex: 1; width: 100%; background: #0f172a; }
+        
+        /* 提示信息 */
+        #msg { margin-right: 20px; font-size: 14px; color: #4ade80; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <div class="title-box">
+        <h1>⚡ 公司配电系统 - 自动生成器</h1>
+        <p>支持 Excel 导入 | 自动解析父子关系 | 4源头展示</p>
+    </div>
+    <div>
+        <span id="msg">✅ 数据加载成功！</span>
+        <div class="upload-btn-wrapper">
+            <button class="btn">📂 上传 Excel 表格生成图表</button>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" />
+        </div>
+    </div>
+</div>
+
+<div id="main-chart"></div>
+
+<script>
+    var myChart = echarts.init(document.getElementById('main-chart'));
+    
+    // 窗口大小改变自适应
+    window.addEventListener('resize', () => myChart.resize());
+
+    // --- 核心功能：处理 Excel 上传 ---
+    document.getElementById('excelFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const data = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // 1. 把 Excel 每一行读成 JSON 数组
+            // header: A对应'id', B对应'name', C对应'parentId', D对应'desc'
+            const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: ["id", "name", "parentId", "desc"], range: 1 }); 
+            
+            // 2. 转换数据格式 (Flat to Tree)
+            try {
+                const treeData = buildTree(rawData);
+                renderChart(treeData);
+                
+                // 显示成功提示
+                const msg = document.getElementById('msg');
+                msg.style.display = 'inline';
+                msg.innerText = `✅ 成功读取 ${rawData.length} 个设备节点`;
+                setTimeout(() => msg.style.display = 'none', 3000);
+
+            } catch (err) {
+                alert("数据格式有误！请确保第一行是 Root 节点且没有上级ID。\n错误信息: " + err);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    // --- 算法：将平铺的表格转为树形结构 ---
+    function buildTree(items) {
+        const root = items.find(i => !i.parentId || i.parentId.trim() === "");
+        if (!root) throw "找不到根节点 (Root)。请确保有一个设备的'上级ID'是空的。";
+
+        const idMapping = items.reduce((acc, el, i) => {
+            acc[el.id] = i;
+            return acc;
+        }, {});
+
+        items.forEach(el => {
+            // 设置样式：根据层级或类型给颜色
+            formatNodeStyle(el);
+            
+            // 找爸爸
+            if (el.parentId && el.parentId.trim() !== "") {
+                const parentEl = items[idMapping[el.parentId]];
+                if (parentEl) {
+                    parentEl.children = [...(parentEl.children || []), el];
+                }
+            }
+        });
+        return root;
+    }
+
+    // --- 样式逻辑：给不同层级上色 ---
+    function formatNodeStyle(node) {
+        node.label = { 
+            formatter: node.name, // 只显示名字
+            fontSize: 14,
+            color: '#ccc'
+        };
+        
+        // 根据 ID 或 名字特征简单配色
+        // 你也可以在Excel里加一列“类型”来精准控制
+        if (!node.parentId) { 
+            // 根节点
+            node.itemStyle = { color: '#fff', borderColor: '#fff' };
+            node.symbolSize = 20;
+            node.label.fontSize = 18;
+            node.label.fontWeight = 'bold';
+        } else if (node.name.includes("变压器") || node.name.includes("箱变")) {
+            node.itemStyle = { color: '#ea580c' }; // 橙色
+            node.symbolSize = 16;
+        } else if (node.name.includes("柜")) {
+            node.itemStyle = { color: '#0ea5e9' }; // 蓝色
+            node.symbolSize = 14;
+        } else {
+            node.itemStyle = { color: '#22c55e' }; // 绿色 (终端)
+            node.symbolSize = 10;
+        }
+    }
+
+    // --- 渲染图表 ---
+    function renderChart(treeData) {
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                triggerOn: 'mousemove',
+                formatter: function(params) {
+                    const desc = params.data.desc ? `<br/>备注: ${params.data.desc}` : "";
+                    const pid = params.data.parentId ? `<br/>上级: ${params.data.parentId}` : "";
+                    return `<strong>${params.data.name}</strong>${pid}${desc}`;
+                }
+            },
+            series: [{
+                type: 'tree',
+                data: [treeData],
+                layout: 'orthogonal',
+                orient: 'LR',
+                top: '5%', left: '5%', bottom: '5%', right: '20%',
+                symbol: 'rect', // 方形节点
+                initialTreeDepth: 2, // 默认展开几层
+                expandAndCollapse: true,
+                label: { position: 'left', verticalAlign: 'middle', align: 'right' },
+                leaves: {
+                    label: { position: 'right', verticalAlign: 'middle', align: 'left' }
+                },
+                lineStyle: { color: '#475569', width: 1.5, curveness: 0.5 }
+            }]
+        };
+        myChart.setOption(option);
+    }
+
+    // --- 初始加载一个空提示 ---
+    myChart.setOption({
+        title: { 
+            text: '请点击左上角按钮上传 Excel 文件\n\nExcel格式要求：\nA列:ID | B列:名称 | C列:上级ID | D列:备注', 
+            left: 'center', top: 'center', 
+            textStyle: { color: '#64748b', fontSize: 20 } 
+        }
+    });
+
+</script>
+
+</body>
+</html>
